@@ -7,10 +7,24 @@ This is a project to build an e-ink reader for the Raspberry Pi zero.
 It's a hobby project to learn about Go, e-ink displays and Raspberry Pi.
 also I want to use a dial to navigate the UI.
 
+## Structure
+
+### App 
+this is a gui for the user to interact with. there is no touch so it will be controller based
+
+### cmd
+this will be the backend for the app. it will be responsible for the following:
+- generating a list of books from files in the books directory (in toml format)
+- take a screenshot of the gui for the e-ink display 0.5 seconds refresh rate
+    - for development purposes Xvfb will be used for the virtual display
+
 ```mermaid
-graph TB
-    subgraph "Development Environment"
-        Dev[Developer] --> FyneApp[Fyne UI App]
+graph TD
+
+    subgraph "User Interaction"
+        EinkScreen --> User[User Input]
+        User --> InputHandler[Input Handler]
+        InputHandler --> FyneApp
     end
     
     subgraph "Virtual Display System"
@@ -35,12 +49,6 @@ graph TB
         EinkApp --> ImageProcess[Image Processing<br/>• Format conversion<br/>• Dithering<br/>• Resize]
         ImageProcess --> EinkDriver[E-ink Hardware Driver]
         EinkDriver --> EinkScreen[E-ink Display]
-    end
-    
-    subgraph "User Interaction"
-        EinkScreen --> User[User Input]
-        User --> InputHandler[Input Handler]
-        InputHandler --> FyneApp
     end
     
     style FyneApp fill:#e1f5fe
