@@ -16,6 +16,7 @@ var data = []string{"Book 1", "Book 2", "Book 3", "Book 4", "Book 5", "Book 6", 
 
 var ROUTE = "list"
 var selectedBook string
+var selectedIndex int
 
 func main() {
 	myApp := app.New()
@@ -32,17 +33,19 @@ func main() {
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			o.(*widget.Label).SetText(data[i])
-		})
+		},
+	)
+	// Set initial selection
+	list.Select(selectedIndex)
 
 	// Add click handler to the list
 	list.OnSelected = func(id widget.ListItemID) {
-		selectedBook = data[id]
-		ROUTE = "book"
-		// Update the window content to show the book view
 		updateWindowContent(myWindow, list)
 	}
-
-	// View "Book"
+	// Add keyboard shortcuts
+	myWindow.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
+		handleKeyPress(key, myWindow, list)
+	})
 
 	// Initial content setup
 	updateWindowContent(myWindow, list)
@@ -70,5 +73,35 @@ func updateWindowContent(myWindow fyne.Window, list *widget.List) {
 		})
 		bookView := container.NewVBox(text, listButton)
 		myWindow.SetContent(bookView)
+	}
+}
+
+func handleKeyPress(key *fyne.KeyEvent, myWindow fyne.Window, list *widget.List) {
+	switch ROUTE {
+	case "list":
+		switch key.Name {
+		case fyne.KeyUp:
+			if selectedIndex > 0 {
+				selectedIndex--
+				list.Select(selectedIndex)
+				list.ScrollTo(selectedIndex)
+			}
+		case fyne.KeyDown:
+			if selectedIndex < len(data)-1 {
+				selectedIndex++
+				list.Select(selectedIndex)
+				list.ScrollTo(selectedIndex)
+			}
+		case fyne.KeyReturn, fyne.KeyEnter:
+			selectedBook = data[selectedIndex]
+			ROUTE = "book"
+			updateWindowContent(myWindow, list)
+		}
+	case "book":
+		switch key.Name {
+		case fyne.KeyEscape, fyne.KeyBackspace:
+			ROUTE = "list"
+			updateWindowContent(myWindow, list)
+		}
 	}
 }
