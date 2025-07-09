@@ -5,6 +5,7 @@ import (
 	"image/color"
 	"time"
 
+	"stagfoo.pennyblack/app/ui"
 	"stagfoo.pennyblack/cmd"
 
 	"fyne.io/fyne/v2"
@@ -45,28 +46,15 @@ var selectedIndex int
 func main() {
 	myApp := app.New()
 	// Set custom font as default
-	fontResource := fyne.NewStaticResource("ppmondwest-regular.ttf", ppmondwestRegular)
-	myApp.Settings().SetTheme(&customTheme{
-		font: fontResource,
+	// ppneuebit := fyne.NewStaticResource(resourcePpneuebitBoldOtf.StaticName, resourcePpneuebitBoldOtf.Content())
+	ppmondwest := fyne.NewStaticResource(resourcePpmondwestRegularOtf.StaticName, resourcePpmondwestRegularOtf.Content())
+	myApp.Settings().SetTheme(&CustomTheme{
+		font: ppmondwest,
 	})
 	myWindow := myApp.NewWindow("E-ink UI")
 	myWindow.Resize(fyne.NewSize(600, 400))
 
-	// View "List"
-	list := widget.NewList(
-		func() int {
-			return len(data)
-		},
-		func() fyne.CanvasObject {
-			return widget.NewLabel("template")
-		},
-		func(i widget.ListItemID, o fyne.CanvasObject) {
-			o.(*widget.Label).SetText(data[i])
-		},
-	)
-	// Set initial selection
-	list.Select(selectedIndex)
-
+	list := ui.List(data, selectedIndex)
 	// Add click handler to the list
 	list.OnSelected = func(id widget.ListItemID) {
 		updateWindowContent(myWindow, list)
