@@ -1,2 +1,4 @@
 main
 .DS_*
+mock/books/*
+.DS_Store
