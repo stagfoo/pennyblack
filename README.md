@@ -11,6 +11,10 @@ also I want to use a dial to navigate the UI.
 
 ### App 
 this is a gui for the user to interact with. there is no touch so it will be controller based
+- Views
+    - Lists
+    - Book/:id
+    - Settings
 
 ### cmd
 this will be the backend for the app. it will be responsible for the following:
@@ -56,3 +60,12 @@ graph TD
     style EinkScreen fill:#e8f5e8
     style Folder fill:#fff3e0
 ```
+
+
+## Fonts
+
+https://www.dafont.com/bitmap.php
+
+### Setup Fonts in Fyne
+
+https://github.com/lusingander/fyne-font-example

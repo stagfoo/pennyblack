@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  fyne-screenshotter:
+    build:
+      # The build context is the project root directory
+      context: ..
+      # The Dockerfile is in the 'mock' subdirectory
+      dockerfile: mock/Dockerfile
+    ports:
+      # SSH port for debugging - maps container port 22 to host port 2222
+      - "2222:22"
+      # Display port (for reference, though not typically accessed externally)
+      - "99:99"
+    volumes:
+      # This mounts your local screenshots folder to the container
+      - ./screenshots:/screenshots
+      - ./mock:/mock
+    # Keep container running for SSH access
+    tty: true
+    stdin_open: true
