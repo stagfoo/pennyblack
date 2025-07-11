@@ -22,6 +22,12 @@ this will be the backend for the app. it will be responsible for the following:
 - take a screenshot of the gui for the e-ink display 0.5 seconds refresh rate
     - for development purposes Xvfb will be used for the virtual display
 
+## Run GUI
+
+```
+go run app/*.go
+```
+
 ```mermaid
 graph TD
 

@@ -3,10 +3,8 @@ package main
 
 import (
 	"image/color"
-	"time"
 
 	"stagfoo.pennyblack/app/ui"
-	"stagfoo.pennyblack/cmd"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -66,14 +64,6 @@ func main() {
 
 	// Initial content setup
 	updateWindowContent(myWindow, list)
-
-	// Screenshot capture routine
-	go func() {
-		ticker := time.NewTicker(2 * time.Second)
-		for range ticker.C {
-			cmd.ScreenRefresh()
-		}
-	}()
 
 	myWindow.ShowAndRun()
 }

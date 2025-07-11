@@ -1,21 +1,24 @@
 version: '3.8'
 
 services:
-  fyne-screenshotter:
-    build:
-      # The build context is the project root directory
-      context: ..
-      # The Dockerfile is in the 'mock' subdirectory
-      dockerfile: mock/Dockerfile
-    ports:
-      # SSH port for debugging - maps container port 22 to host port 2222
-      - "2222:22"
-      # Display port (for reference, though not typically accessed externally)
-      - "99:99"
+  fyne-app:
+    build: .
     volumes:
-      # This mounts your local screenshots folder to the container
+      # Mount screenshots directory to host
       - ./screenshots:/screenshots
-      - ./mock:/mock
-    # Keep container running for SSH access
+      - ./bin:/bin
+      - ./books:/books
+      # Mount your Fyne app if it's external
+      # - ./your-fyne-app:/app/your-fyne-app
+    environment:
+      - DISPLAY=:99
+    ports:
+      - "2222:22"  # SSH port
+      # If your app needs network access
+      # - "8080:8080"
+    # Security context for X11
+    security_opt:
+      - seccomp:unconfined
+    # Allocate a tty for proper X11 operation
     tty: true
     stdin_open: true
