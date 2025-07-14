@@ -2,3 +2,6 @@ main
 .DS_*
 mock/books/*
 .DS_Store
+mock/screenshots/*
+bin/*
+bin/!*.toml

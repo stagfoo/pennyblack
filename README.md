@@ -28,45 +28,11 @@ this will be the backend for the app. it will be responsible for the following:
 go run app/*.go
 ```
 
-```mermaid
-graph TD
+## Breadown
 
-    subgraph "User Interaction"
-        EinkScreen --> User[User Input]
-        User --> InputHandler[Input Handler]
-        InputHandler --> FyneApp
-    end
-    
-    subgraph "Virtual Display System"
-        Xvfb[Xvfb Virtual X Server<br/>:99 Display]
-        FyneApp --> Xvfb
-    end
-    
-    subgraph "UI Generation Process"
-        FyneApp --> Lists[Lists & Routes UI]
-        Lists --> Screenshot[Screenshot Timer<br/>Every 2 seconds]
-        Screenshot --> ImageMagick[ImageMagick<br/>import command]
-        ImageMagick --> Xvfb
-    end
-    
-    subgraph "File System"
-        ImageMagick --> Folder[screendump/<br/>current.png]
-        Folder --> FileWatch[File Watcher<br/>fsnotify]
-    end
-    
-    subgraph "E-ink Display System"
-        FileWatch --> EinkApp[E-ink Display App]
-        EinkApp --> ImageProcess[Image Processing<br/>• Format conversion<br/>• Dithering<br/>• Resize]
-        ImageProcess --> EinkDriver[E-ink Hardware Driver]
-        EinkDriver --> EinkScreen[E-ink Display]
-    end
-    
-    style FyneApp fill:#e1f5fe
-    style EinkApp fill:#f3e5f5
-    style EinkScreen fill:#e8f5e8
-    style Folder fill:#fff3e0
-```
-
+Toml -> generate toml -> save to file (might remove)
+Fyne App -> open toml -> UI -> screenshot
+Python Header -> open screenshot -> send to e-ink display
 
 ## Fonts
 

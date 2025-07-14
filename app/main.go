@@ -2,8 +2,12 @@
 package main
 
 import (
+	"fmt"
 	"image/color"
+	"image/png"
+	"os"
 
+	"github.com/google/uuid"
 	"stagfoo.pennyblack/app/ui"
 
 	"fyne.io/fyne/v2"
@@ -40,6 +44,32 @@ var data = []string{"Book 1", "Book 2", "Book 3", "Book 4", "Book 5", "Book 6", 
 var ROUTE = "list"
 var selectedBook string
 var selectedIndex int
+
+func updateScreen(myWindow fyne.Window) {
+	// Capture the current canvas content
+	id := uuid.New()
+	img := myWindow.Canvas().Capture()
+	// Check if capture returned nil (window not ready)
+	if img == nil {
+		fmt.Println("Canvas capture returned nil - window not ready")
+		return
+	}
+
+	// Save to file that your e-ink display can read
+	// (you'd need to import "image/png" or similar)
+	cwd, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("Error getting current directory: %v\n", err)
+		return
+	}
+	file, err := os.Create(cwd + "/mock/screenshots/" + id.String() + ".png")
+	if err != nil {
+		fmt.Printf("Error creating file: %v\n", err)
+		return
+	}
+	defer file.Close()
+	png.Encode(file, img)
+}
 
 func main() {
 	myApp := app.New()
@@ -111,4 +141,5 @@ func handleKeyPress(key *fyne.KeyEvent, myWindow fyne.Window, list *widget.List)
 			updateWindowContent(myWindow, list)
 		}
 	}
+	updateScreen(myWindow)
 }
