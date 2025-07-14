@@ -23,32 +23,32 @@ type Book struct {
 	Activity Activity `toml:"activity"`
 }
 
-type CacheToml struct {
+type DB struct {
 	CreatedAt string `toml:"created_at"`
 	UpdatedAt string `toml:"updated_at"`
 	Version   int    `toml:"version"`
 	Books     []Book `toml:"books"`
 }
 
-func ReadToml(path string) CacheToml {
+func ReadToml(path string) DB {
 	fmt.Print("Target Path", path)
 	doc, readErr := os.ReadFile(path)
 	if readErr != nil {
 		fmt.Print("File Read Error", readErr)
-		var empty CacheToml
+		var empty DB
 		return empty
 	}
-	var db CacheToml
+	var db DB
 	err := toml.Unmarshal([]byte(doc), &db)
 	if err != nil {
 		fmt.Print("Toml Read Error", err)
-		var empty CacheToml
+		var empty DB
 		return empty
 	}
 	return db
 }
 
-func SaveToml(db CacheToml, path string) bool {
+func SaveToml(db DB, path string) bool {
 	b, err := toml.Marshal(db)
 	fmt.Print("Got DB")
 
@@ -111,7 +111,7 @@ func main() {
 		for _, file := range files {
 			bookList = append(bookList, ConvertFilePathToBook(file))
 		}
-		var db = *&CacheToml{
+		var db = *&DB{
 			Books: bookList,
 		}
 		SaveToml(db, currentDir+"/mock/bin/books.toml")
