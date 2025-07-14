@@ -3,5 +3,5 @@ main
 mock/books/*
 .DS_Store
 mock/screenshots/*
-bin/*
-bin/!*.toml
+mock/bin/*
+mock/bin/!*.toml

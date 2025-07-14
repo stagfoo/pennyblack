@@ -3,7 +3,7 @@ updated_at = ""
 version = 0
 
 [[books]]
-  title = "Book"
+  title = "Yokai Tales"
   file = "/Users/alexander.king/.0_dotfiles/pennyblack/mock/books/book.epub"
   [books.activity]
     date = ""
@@ -11,7 +11,7 @@ version = 0
     minutes = 0
 
 [[books]]
-  title = "Book"
+  title = "Ghost Detective"
   file = "/Users/alexander.king/.0_dotfiles/pennyblack/mock/books/comic-1.cbr"
   [books.activity]
     date = ""

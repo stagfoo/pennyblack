@@ -7,6 +7,8 @@ require (
 	github.com/google/uuid v1.6.0
 )
 
+require github.com/taylorskalyo/goreader v1.0.1 // indirect
+
 require (
 	fyne.io/systray v1.11.0 // indirect
 	github.com/BurntSushi/toml v1.4.0
