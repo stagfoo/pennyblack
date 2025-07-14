@@ -14,39 +14,39 @@ type Activity struct {
 }
 
 type Book struct {
-	Title    string   `toml:"title"`
-	File     string   `toml:"file"`
-	Cover    string   `toml:"cover"`
-	Author   string   `toml:"author"`
+	Title string `toml:"title"`
+	File  string `toml:"file"`
+	// Cover    string   `toml:"cover"`
+	// Author   string   `toml:"author"`
 	Activity Activity `toml:"activity"`
 }
 
-type CacheToml struct {
+type DB struct {
 	CreatedAt string `toml:"created_at"`
 	UpdatedAt string `toml:"updated_at"`
 	Version   int    `toml:"version"`
 	Books     []Book `toml:"books"`
 }
 
-func ReadToml[DBType any](path string) DBType {
+func ReadToml(path string) DB {
 	fmt.Print("Target Path", path)
 	doc, readErr := os.ReadFile(path)
 	if readErr != nil {
 		fmt.Print("File Read Error", readErr)
-		var empty DBType
+		var empty DB
 		return empty
 	}
-	var db DBType
+	var db DB
 	err := toml.Unmarshal([]byte(doc), &db)
 	if err != nil {
 		fmt.Print("Toml Read Error", err)
-		var empty DBType
+		var empty DB
 		return empty
 	}
 	return db
 }
 
-func SaveToml[DBType any](db any, path string) bool {
+func SaveToml(db DB, path string) bool {
 	b, err := toml.Marshal(db)
 	if err != nil {
 		panic(err)

@@ -8,8 +8,9 @@ import (
 )
 
 type CustomTheme struct {
-	font fyne.Resource
-	size fyne.Size
+	font  fyne.Resource
+	size  fyne.Size
+	color color.Color
 }
 
 func (t *CustomTheme) Font(style fyne.TextStyle) fyne.Resource {
@@ -17,6 +18,22 @@ func (t *CustomTheme) Font(style fyne.TextStyle) fyne.Resource {
 }
 
 func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
+	switch name {
+	case theme.ColorNameSelection:
+		return color.Black
+	case theme.ColorNameFocus:
+		return color.White
+	case theme.ColorNameBackground:
+		return color.White
+	case theme.ColorNameForeground:
+		return color.Black
+	case theme.ColorNameSeparator:
+		return color.Black
+	case theme.ColorNameButton:
+		return color.Black
+	case theme.ColorNameForegroundOnPrimary:
+		return color.White
+	}
 	return theme.DefaultTheme().Color(name, variant)
 }
 
@@ -37,4 +54,15 @@ func (t *CustomTheme) Size(name fyne.ThemeSizeName) float32 {
 	default:
 		return theme.DefaultTheme().Size(name)
 	}
+}
+
+func SetTheme(app fyne.App) {
+	fontOptions := map[string]fyne.Resource{
+		"ppneuebit":  fyne.NewStaticResource(resourcePpneuebitBoldOtf.StaticName, resourcePpneuebitBoldOtf.Content()),
+		"ppmondwest": fyne.NewStaticResource(resourcePpmondwestRegularOtf.StaticName, resourcePpmondwestRegularOtf.Content()),
+	}
+	app.Settings().SetTheme(&CustomTheme{
+		font:  fontOptions["ppmondwest"],
+		color: color.White,
+	})
 }

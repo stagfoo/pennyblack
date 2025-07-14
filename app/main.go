@@ -3,44 +3,20 @@ package main
 
 import (
 	"fmt"
-	"image/color"
 	"image/png"
 	"os"
 
 	"github.com/google/uuid"
+	files "stagfoo.pennyblack/app/files"
 	"stagfoo.pennyblack/app/ui"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
-type customTheme struct {
-	font fyne.Resource
-}
-
-func (t *customTheme) Font(style fyne.TextStyle) fyne.Resource {
-	return t.font
-}
-
-func (t *customTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
-	return theme.DefaultTheme().Color(name, variant)
-}
-
-func (t *customTheme) Icon(name fyne.ThemeIconName) fyne.Resource {
-	return theme.DefaultTheme().Icon(name)
-}
-
-func (t *customTheme) Size(name fyne.ThemeSizeName) float32 {
-	return theme.DefaultTheme().Size(name)
-}
-
-var ppmondwestRegular []byte
-
-var data = []string{"Book 1", "Book 2", "Book 3", "Book 4", "Book 5", "Book 6", "Book 7", "Book 8", "Book 9", "Book 10", "Book 11", "Book 12", "Book 13", "Book 14", "Book 15", "Book 16", "Book 17", "Book 18", "Book 19", "Book 20"}
-
+var DB files.DB
 var ROUTE = "list"
 var selectedBook string
 var selectedIndex int
@@ -54,9 +30,6 @@ func updateScreen(myWindow fyne.Window) {
 		fmt.Println("Canvas capture returned nil - window not ready")
 		return
 	}
-
-	// Save to file that your e-ink display can read
-	// (you'd need to import "image/png" or similar)
 	cwd, err := os.Getwd()
 	if err != nil {
 		fmt.Printf("Error getting current directory: %v\n", err)
@@ -71,42 +44,52 @@ func updateScreen(myWindow fyne.Window) {
 	png.Encode(file, img)
 }
 
+func LoadDB() files.DB {
+	cwd, _ := os.Getwd()
+	return files.ReadToml(cwd + "/mock/bin/books.toml")
+}
+
+func GetListFromDB(db_books []files.Book) []string {
+	var list []string
+	for _, book := range db_books {
+		list = append(list, book.Title)
+	}
+	return list
+}
+
 func main() {
 	myApp := app.New()
 	// Set custom font as default
-	// ppneuebit := fyne.NewStaticResource(resourcePpneuebitBoldOtf.StaticName, resourcePpneuebitBoldOtf.Content())
-	ppmondwest := fyne.NewStaticResource(resourcePpmondwestRegularOtf.StaticName, resourcePpmondwestRegularOtf.Content())
-	myApp.Settings().SetTheme(&CustomTheme{
-		font: ppmondwest,
-	})
+	SetTheme(myApp)
 	myWindow := myApp.NewWindow("E-ink UI")
 	myWindow.Resize(fyne.NewSize(600, 400))
-
-	list := ui.List(data, selectedIndex)
+	DB = LoadDB()
+	listView := ui.List(DB.Books, selectedIndex)
 	// Add click handler to the list
-	list.OnSelected = func(id widget.ListItemID) {
-		updateWindowContent(myWindow, list)
+	listView.OnSelected = func(id widget.ListItemID) {
+		updateWindowContent(myWindow, listView)
 	}
 	// Add keyboard shortcuts
 	myWindow.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
-		handleKeyPress(key, myWindow, list)
+		handleKeyPress(key, myWindow, listView)
 	})
 
 	// Initial content setup
-	updateWindowContent(myWindow, list)
+	updateWindowContent(myWindow, listView)
 
 	myWindow.ShowAndRun()
 }
 
-func updateWindowContent(myWindow fyne.Window, list *widget.List) {
+func updateWindowContent(myWindow fyne.Window, listView *widget.List) {
 	switch ROUTE {
 	case "list":
-		myWindow.SetContent(list)
+		myWindow.SetContent(listView)
 	case "book":
+
 		text := widget.NewLabel("Selected: " + selectedBook)
 		listButton := widget.NewButton("To List", func() {
 			ROUTE = "list"
-			updateWindowContent(myWindow, list)
+			updateWindowContent(myWindow, listView)
 		})
 		bookView := container.NewVBox(text, listButton)
 		myWindow.SetContent(bookView)
@@ -114,6 +97,7 @@ func updateWindowContent(myWindow fyne.Window, list *widget.List) {
 }
 
 func handleKeyPress(key *fyne.KeyEvent, myWindow fyne.Window, list *widget.List) {
+
 	switch ROUTE {
 	case "list":
 		switch key.Name {
@@ -124,13 +108,14 @@ func handleKeyPress(key *fyne.KeyEvent, myWindow fyne.Window, list *widget.List)
 				list.ScrollTo(selectedIndex)
 			}
 		case fyne.KeyDown:
-			if selectedIndex < len(data)-1 {
+			if selectedIndex < len(DB.Books)-1 {
 				selectedIndex++
 				list.Select(selectedIndex)
 				list.ScrollTo(selectedIndex)
 			}
 		case fyne.KeyReturn, fyne.KeyEnter:
-			selectedBook = data[selectedIndex]
+			var book = DB.Books[selectedIndex]
+			selectedBook = book.Title
 			ROUTE = "book"
 			updateWindowContent(myWindow, list)
 		}
