@@ -114,7 +114,7 @@ func main() {
 		var db = *&DB{
 			Books: bookList,
 		}
-		SaveToml(db, currentDir+"/mock/bin/books.toml")
+		SaveToml(db, currentDir+"/mock/books/books.toml")
 	}
 
 	go func() {

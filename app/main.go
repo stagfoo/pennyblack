@@ -18,7 +18,7 @@ import (
 
 var DB files.DB
 var ROUTE = "list"
-var selectedBook string
+var selectedBook files.Book
 var selectedIndex int
 
 func updateScreen(myWindow fyne.Window) {
@@ -46,7 +46,7 @@ func updateScreen(myWindow fyne.Window) {
 
 func LoadDB() files.DB {
 	cwd, _ := os.Getwd()
-	return files.ReadToml(cwd + "/mock/bin/books.toml")
+	return files.ReadToml(cwd + "/mock/books/books.toml")
 }
 
 func GetListFromDB(db_books []files.Book) []string {
@@ -85,13 +85,25 @@ func updateWindowContent(myWindow fyne.Window, listView *widget.List) {
 	case "list":
 		myWindow.SetContent(listView)
 	case "book":
-
-		text := widget.NewLabel("Selected: " + selectedBook)
+		var chapters, book = files.ReadEPUB(selectedBook.File)
+		for _, chapter := range chapters {
+			files.ReadItem(*chapter.Item)
+		}
+		defer book.Close()
+		text := widget.NewLabel("Selected: " + selectedBook.Title)
+		content, err := files.XhtmlToRichText(string(files.ReadItem(*chapters[1].Item)))
+		if err != nil {
+			fmt.Println("Error converting XHTML to RichText:", err)
+			return
+		}
 		listButton := widget.NewButton("To List", func() {
 			ROUTE = "list"
 			updateWindowContent(myWindow, listView)
 		})
-		bookView := container.NewVBox(text, listButton)
+
+		// Create the content container first
+		bookView := container.NewVBox(text, content, listButton)
+
 		myWindow.SetContent(bookView)
 	}
 }
@@ -114,8 +126,7 @@ func handleKeyPress(key *fyne.KeyEvent, myWindow fyne.Window, list *widget.List)
 				list.ScrollTo(selectedIndex)
 			}
 		case fyne.KeyReturn, fyne.KeyEnter:
-			var book = DB.Books[selectedIndex]
-			selectedBook = book.Title
+			selectedBook = DB.Books[selectedIndex]
 			ROUTE = "book"
 			updateWindowContent(myWindow, list)
 		}
@@ -125,6 +136,7 @@ func handleKeyPress(key *fyne.KeyEvent, myWindow fyne.Window, list *widget.List)
 			ROUTE = "list"
 			updateWindowContent(myWindow, list)
 		}
+
 	}
 	updateScreen(myWindow)
 }
