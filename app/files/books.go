@@ -87,6 +87,7 @@ func XhtmlToRichText(xhtml string) (*widget.RichText, error) {
 		switch tt {
 		case html.ErrorToken:
 			err := tokenizer.Err()
+			fmt.Print(segments)
 			if err == io.EOF {
 				// End of the document, we're done
 				return widget.NewRichText(segments...), nil

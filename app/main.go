@@ -62,7 +62,8 @@ func main() {
 	// Set custom font as default
 	SetTheme(myApp)
 	myWindow := myApp.NewWindow("E-ink UI")
-	myWindow.Resize(fyne.NewSize(600, 400))
+	myWindow.Resize(fyne.NewSize(400, 300))
+	myWindow.SetFixedSize(true) //
 	DB = LoadDB()
 	listView := ui.List(DB.Books, selectedIndex)
 	// Add click handler to the list
@@ -96,13 +97,18 @@ func updateWindowContent(myWindow fyne.Window, listView *widget.List) {
 			fmt.Println("Error converting XHTML to RichText:", err)
 			return
 		}
+
+		// Wrap the content in a scroll container to handle long text
+		scrollableContent := container.NewScroll(content)
+		scrollableContent.SetMinSize(fyne.NewSize(280, 300)) // Slightly smaller than window to account for padding
+
 		listButton := widget.NewButton("To List", func() {
 			ROUTE = "list"
 			updateWindowContent(myWindow, listView)
 		})
 
-		// Create the content container first
-		bookView := container.NewVBox(text, content, listButton)
+		// Create the content container with scrollable content
+		bookView := container.NewVBox(text, scrollableContent, listButton)
 
 		myWindow.SetContent(bookView)
 	}

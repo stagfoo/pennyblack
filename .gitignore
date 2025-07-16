@@ -5,3 +5,4 @@ mock/books/*
 mock/screenshots/*
 mock/bin/*
 mock/bin/!*.toml
+mock/bin/app
