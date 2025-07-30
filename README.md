@@ -31,7 +31,9 @@ go run app/*.go
 ## Breadown
 
 Toml -> generate toml -> save to file (might remove)
+
 Fyne App -> open toml -> UI -> screenshot
+
 Python Header -> open screenshot -> send to e-ink display
 
 ## Fonts
