@@ -8,11 +8,6 @@ import traceback
 from PIL import Image
 from waveshare_epd import epd4in2_V2
 
-# Import the 'keyboard' library to listen for system-wide key presses.
-# You may need to install it: pip install keyboard
-# On Linux, this script must be run as root for the keyboard library to work.
-import keyboard
-
 # --- Setup paths ---
 picdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'pic')
 libdir = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), 'lib')
@@ -25,66 +20,73 @@ logging.basicConfig(level=logging.DEBUG)
 # We initialize it once here.
 try:
     epd = epd4in2_V2.EPD()
+    epd.Init_4Gray()
+    epd.Clear()
+
 except Exception as e:
     logging.error(f"Failed to initialize EPD: {e}")
     exit()
 
-def update_display(image_filename):
+def clear_white():
+    epd.init_fast(epd.Seconds_1_5S)
+    WhiteImage = Image.new('1', (epd.height, epd.width), 255)
+    epd.display_Fast(epd.getbuffer(WhiteImage))
+    epd.sleep()
+
+def update_display(bmp):
     """
     Handles the complete cycle of waking, updating, and sleeping the display.
-    This is called whenever a registered key is pressed.
+    This is called every 1 second with a different image.
     """
-    image_path = os.path.join(picdir, image_filename)
-    logging.info(f"Attempting to display image: {image_path}")
-
     try:
         # 1. Wake up the display for updating
-        logging.info("Initializing display (waking up)...")
-        epd.init()
-
-        # 2. Load the specified BMP image
-        image = Image.open(image_path)
-
-        # 3. Display the image on the screen
-        logging.info("Sending image to display...")
-        epd.Init_4Gray()
-        epd.display_4Gray(epd.getbuffer_4Gray(image))
-
-        # 4. Put the display back to sleep to conserve power
-        logging.info("Putting display to sleep.")
-        epd.sleep()
+        epd.init_fast(epd.Seconds_1_5S)
+        WhiteImage = Image.new('1', (epd.width,epd.height), 255)  # 255: clear the frame
+        # bmp = Image.open(os.path.join(picdir, image_filename))
+        WhiteImage.paste(bmp, (0,0))
+        epd.display_4Gray(epd.getbuffer_4Gray(WhiteImage))
 
     except FileNotFoundError:
-        logging.error(f"Image file not found at: {image_path}")
+        logging.error(f"Image file not found")
     except Exception as e:
         logging.error(f"An error occurred during display update: {e}")
 
 
 def main():
     """
-    Main function to set up the initial display and keyboard listeners.
+    Main function to cycle through images every 1 second.
     """
+    
+    # List of images to cycle through
+
+    image1 = Image.open(os.path.join(picdir, 'page_1.png'))
+    image2 = Image.open(os.path.join(picdir, 'page_2.png'))
+    image3= Image.open(os.path.join(picdir, 'page_3.png'))
+    image4 = Image.open(os.path.join(picdir, 'page_4.png'))
+    image_list = [
+        image1,
+        image2,
+        image3,
+        image4,
+    ]
+    
     try:
-        logging.info("--- Starting EPD Image Viewer ---")
-        logging.info("Displaying initial image...")
-        # Display a default image ('penny.bmp') on startup
-        update_display('penny.bmp')
-
-        # --- Setup Keyboard Listeners ---
-        # The old 'while True' loop with epd.get_key() has been replaced.
-        # We now use the 'keyboard' library to trigger updates in the background.
-        # A lambda function is used to pass the correct image filename to our handler.
-        logging.info("Setting up keyboard listeners for 'q', 'w', 'e', 'r', 't'...")
-        keyboard.on_press_key("q", lambda _: update_display('q_image.bmp'))
-        keyboard.on_press_key("w", lambda _: update_display('w_image.bmp'))
-        keyboard.on_press_key("e", lambda _: update_display('e_image.bmp'))
-        keyboard.on_press_key("r", lambda _: update_display('r_image.bmp'))
-        keyboard.on_press_key("t", lambda _: update_display('mushishi-page.jpg'))
-
-        logging.info("Ready for keyboard input. Press Ctrl+C to exit.")
-        # Keep the script running to listen for key presses
+        logging.info("--- Starting EPD Image Viewer (Auto-cycling) ---")
+        
+        image_index = 0
+        clear_white()
         while True:
-            time.sleep(1)
+            # Get current image from the list
+            current_image = image_list[image_index]
+            
+            # Update the display with current image
+            update_display(current_image)
+            
+            # Move to next image (cycle back to 0 when we reach the end)
+            image_index = (image_index + 1) % len(image_list)
+            
+            # Wait 1 second before next update
+            logging.info("Waiting 1 second before next image...")
 
     except IOError as e:
         logging.error(e)

@@ -91,16 +91,19 @@ func updateWindowContent(myWindow fyne.Window, listView *widget.List) {
 			files.ReadItem(*chapter.Item)
 		}
 		defer book.Close()
-		text := widget.NewLabel("Selected: " + selectedBook.Title)
-		content, err := files.XhtmlToRichText(string(files.ReadItem(*chapters[1].Item)))
+		fmt.Println(string(files.ReadItem(*chapters[2].Item)))
+		content, err := files.XhtmlToRichText(string(files.ReadItem(*chapters[2].Item)))
 		if err != nil {
 			fmt.Println("Error converting XHTML to RichText:", err)
 			return
 		}
 
+		// Enable text wrapping
+		content.Wrapping = fyne.TextWrapWord
+
 		// Wrap the content in a scroll container to handle long text
 		scrollableContent := container.NewScroll(content)
-		scrollableContent.SetMinSize(fyne.NewSize(280, 300)) // Slightly smaller than window to account for padding
+		scrollableContent.SetMinSize(fyne.NewSize(280, 300))
 
 		listButton := widget.NewButton("To List", func() {
 			ROUTE = "list"
@@ -108,7 +111,7 @@ func updateWindowContent(myWindow fyne.Window, listView *widget.List) {
 		})
 
 		// Create the content container with scrollable content
-		bookView := container.NewVBox(text, scrollableContent, listButton)
+		bookView := container.NewVBox(scrollableContent, listButton)
 
 		myWindow.SetContent(bookView)
 	}

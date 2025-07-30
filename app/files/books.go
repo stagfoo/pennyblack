@@ -6,6 +6,7 @@ import (
 	"log"
 	"strings"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
 	"github.com/taylorskalyo/goreader/epub"
 	"golang.org/x/net/html"
@@ -69,7 +70,6 @@ func ReadItem(item epub.Item) string {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(string(content))
 	return string(content)
 }
 
@@ -80,55 +80,59 @@ func XhtmlToRichText(xhtml string) (*widget.RichText, error) {
 	var segments []widget.RichTextSegment
 
 	// Basic state tracking for styles
-	var isBold, isItalic bool
+	var tag string
 
 	for {
 		tt := tokenizer.Next()
 		switch tt {
 		case html.ErrorToken:
 			err := tokenizer.Err()
-			fmt.Print(segments)
 			if err == io.EOF {
-				// End of the document, we're done
-				return widget.NewRichText(segments...), nil
+				// End of the document, create RichText with wrapping enabled
+				richText := widget.NewRichText(segments...)
+				richText.Wrapping = fyne.TextWrapWord
+				return richText, nil
 			}
 			// Some other error
 			return nil, err
 
 		case html.TextToken:
 			text := string(tokenizer.Text())
+			// Skip empty or whitespace-only text nodes
+			if strings.TrimSpace(text) == "" {
+				continue
+			}
+
 			segment := &widget.TextSegment{Text: text}
 
 			// Apply current style
-			if isBold {
+			if tag == "strong" || tag == "b" {
 				segment.Style = widget.RichTextStyleStrong
-			} else if isItalic {
+			}
+			if tag == "em" || tag == "i" {
 				segment.Style = widget.RichTextStyleEmphasis
+			}
+			if tag == "p" {
+				segment.Style = widget.RichTextStyleParagraph
+			}
+			if tag == "h1" {
+				segment.Style = widget.RichTextStyleHeading
+			}
+			if tag == "h2" {
+				segment.Style = widget.RichTextStyleSubHeading
+			}
+			if tag == "a" {
+				segment.Style = widget.RichTextStyleStrong
+			}
+			if tag == "br" {
+				segment.Text = "\n"
 			}
 			segments = append(segments, segment)
 
 		case html.StartTagToken, html.EndTagToken:
 			tn, _ := tokenizer.TagName()
 			tagName := string(tn)
-
-			var styleState bool
-			if tt == html.StartTagToken {
-				styleState = true // Entering a tag
-			} else {
-				styleState = false // Exiting a tag
-			}
-
-			switch tagName {
-			case "strong", "b":
-				isBold = styleState
-			case "em", "i":
-				isItalic = styleState
-			case "p", "h1", "h2", "h3", "br":
-				// Add a newline for block elements or line breaks
-				if tt == html.EndTagToken || tagName == "br" {
-					segments = append(segments, &widget.TextSegment{Text: "\n", Style: widget.RichTextStyleParagraph})
-				}
-			}
+			tag = tagName
 		}
 	}
 }

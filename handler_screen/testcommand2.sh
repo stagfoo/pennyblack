@@ -1,0 +1,5 @@
+feh -Y -F -Z -z -r -D 5 ~/ftp/files/epd_examples/python/pic & watch -n 5 "scrot --overwrite /tmp/screenshot.png && 
+
+
+
+kitty nnn ~/ftp/files/epd_examples/python/pic & watch -n 5 "scrot --overwrite /tmp/screenshot.png && python3 ~/ftp/files/epd_examples/python/examples/buffer-test-1.py"
